@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Button,
   Card,
@@ -10,33 +10,60 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
 
-const TransactionForm = ({fetchTransactions}) => {
+
+const TransactionForm = ({ fetchTransactions, editTransactions , setEditTransactions }) => {
   const [form, setForm] = useState({
-    amount: 0,
+    amount: "",
     description: "",
     date: null,
   });
 
+  useEffect(() => {
+    if (editTransactions.amount !== undefined) {
+      setForm(editTransactions);
+    }
+  }, [editTransactions]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    //setFormSubmit([...formSubmit , form])
-  const res =  await fetch("http://localhost:4000/transaction", {
+   editTransactions.amount === undefined ? create() : update();
+  };
+
+  const reload = (res) => {
+    if (res.ok) {
+        setForm({
+            amount: "",
+            description: "",
+            date: null,
+          });
+      fetchTransactions();
+    }
+}
+
+  const create = async () => {
+    const res = await fetch("http://localhost:4000/transaction", {
       method: "POST",
       body: JSON.stringify(form),
       headers: {
         "content-type": "application/json",
       },
     });
+    reload(res);
+  };
 
-    setForm({
-      amount: 0,
-      description: "",
-      date: null,
-    });
-
-    if(res.ok){
-      fetchTransactions()
-    }
+  const update = async () => {
+    const res = await fetch(
+      `http://localhost:4000/transaction/${editTransactions._id}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(form),
+        headers: {
+          "content-type": "application/json",
+        },
+      }
+    );
+    setEditTransactions({})
+    reload(res);
   };
 
   const handleInput = (e) => {
@@ -44,8 +71,10 @@ const TransactionForm = ({fetchTransactions}) => {
   };
 
   const handleDate = (newValue) => {
-     setForm({...form , date :newValue})
-  }
+    setForm({ ...form, date: newValue });
+  };
+
+  console.log(editTransactions)
   return (
     <Card sx={{ minWidth: 275, marginTop: 10 }}>
       <CardContent>
@@ -73,21 +102,27 @@ const TransactionForm = ({fetchTransactions}) => {
             onChange={handleInput}
             name="description"
           />
-          <LocalizationProvider  dateAdapter={AdapterDayjs}>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DesktopDatePicker
               label="Transaction Date"
               value={form.date}
               onChange={handleDate}
               renderInput={(params) => (
-                <TextField sx={{ marginRight: 5 }}   
-             size="small"  {...params} />
+                <TextField sx={{ marginRight: 5 }} size="small" {...params} />
               )}
             />
           </LocalizationProvider>
 
-          <Button type="submit" variant="contained">
-            Submit
-          </Button>
+          {editTransactions.amount === undefined && (
+            <Button type="submit" variant="contained">
+              Submit
+            </Button>
+          )}
+          {editTransactions.amount !== undefined && (
+            <Button type="submit" variant="contained">
+              Update
+            </Button>
+          )}
         </form>
       </CardContent>
     </Card>

@@ -1,11 +1,13 @@
+import { Container } from "@mui/material";
 import { useEffect, useState } from "react";
 import "./App.css";
 import ButtonAppBar from "./components/AppBarMenu";
 import TransactionForm from "./components/TransactionForm";
-
+import TransactionList from "./components/TransactionList";
 
 function App() {
   const [transactions, setTransactions] = useState([]);
+  const [editTransactions, setEditTransactions] = useState({});
 
   const fetchTransactions = async () => {
     const res = await fetch("http://localhost:4000/transaction");
@@ -15,33 +17,15 @@ function App() {
 
   useEffect(() => {
     fetchTransactions();
-  },[]);
-
+  }, []);
 
   return (
     <>
-    <ButtonAppBar/>
-    <TransactionForm fetchTransactions={fetchTransactions}/>
-      <br />
-      <table>
-        <thead>
-          <th>Amount</th>
-          <th>Description</th>
-          <th>Date</th>
-        </thead>
-        <tbody>
-          {transactions &&
-            transactions.map((item) => {
-              return (
-                <tr key={item._id}>
-                  <td>{item.amount}</td>
-                  <td>{item.description}</td>
-                  <td>{item.date}</td>
-                </tr>
-              );
-            })}
-        </tbody>
-      </table>
+      <ButtonAppBar />
+        <Container>
+        <TransactionForm fetchTransactions={fetchTransactions} editTransactions={editTransactions}  setEditTransactions={setEditTransactions}/>
+        <TransactionList transactions={transactions} fetchTransactions={fetchTransactions} setEditTransactions={setEditTransactions} />
+      </Container>
     </>
   );
 }
