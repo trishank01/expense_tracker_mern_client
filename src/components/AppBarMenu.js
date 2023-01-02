@@ -6,6 +6,7 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
+import { Link } from 'react-router-dom';
 
 const AppBarMenu = ()  => {
   return (
@@ -24,7 +25,10 @@ const AppBarMenu = ()  => {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             Expense Tracker
           </Typography>
+          <Link to="/login" style={{textDecoration: 'none' , color : "white"}}>
           <Button color="inherit">Login</Button>
+          </Link>
+         
         </Toolbar>
       </AppBar>
     </Box>
